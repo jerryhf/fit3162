@@ -3,7 +3,7 @@
 # Info
 - Video and landmark in the Google Drive ch-sims-landmark and ch-sims-videos
 - Files starting with ._ are removed
-- 4 videos I remember are missing from ch-sims-videos, not sure where
+- 4 videos I remember are missing from ch-sims-videos, not sure where just continue first
 
 # Next steps
 - Preprocessing for GRID and LRS is different
