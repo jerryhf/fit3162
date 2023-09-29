@@ -48,7 +48,7 @@ def visualize_landmarks(input_video_path, input_landmark_path, output_video_path
     cv2.destroyAllWindows()
 
 
-video_input_id = r"00015"
+video_input_id = r"00000"
 
 video_input = f"./aqgy3_0001/{video_input_id}.mp4"
 landmark_input = f"./ch-sims-landmark/{video_input_id}_landmarks_output.txt"
