@@ -4,6 +4,7 @@
 - Video and landmark in the Google Drive ch-sims-landmark and ch-sims-videos
 - Files starting with ._ are removed
 - 4 videos I remember are missing from ch-sims-videos, not sure where just continue first
+- Dandi have complete LMs (dandi_face_landmark), I have significantly less (ch-sims-landmark)
 
 # Next steps
 - Preprocessing for GRID and LRS is different
