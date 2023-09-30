@@ -10,7 +10,7 @@ def parse_args():
 
 args = parse_args()
 
-vid_files = sorted(glob.glob(os.path.join(args.Grid_dir, '*', 'video', '*.mpg')))   #suppose the directory: Data_dir/subject/video/mpg files
+vid_files = sorted(glob.glob(os.path.join(args.Grid_dir, '**', '*.mp4'), recursive=True))
 for k, v in enumerate(vid_files):
     t, f_name = os.path.split(v)
     t, _ = os.path.split(t)
@@ -24,4 +24,5 @@ for k, v in enumerate(vid_files):
             os.makedirs(out_aud)
         subprocess.call(f'ffmpeg -y -i {v} -qscale:v 2 -r 25 {out_im}/%02d.png', shell=True)
         subprocess.call(f'ffmpeg -y -i {v} -ac 1 -acodec pcm_s16le -ar 16000 {os.path.join(out_aud, f_name[:-4] + ".wav")}', shell=True)
-    print(f'{k}/{len(vid_files)}')
+    # print(f'{k}/{len(vid_files)}')
+
