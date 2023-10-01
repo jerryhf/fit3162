@@ -102,22 +102,23 @@ def process_video(input_video_path, output_file_path):
         if not ret:
             break
 
+        temp_landmark_coords = []
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
         results = face_mesh.process(rgb_frame)
+
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                temp_landmark_coords = []
-
                 for index in highlighted_landmarks_indices:
                     landmark = face_landmarks.landmark[index]
                     x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0])
                     temp_landmark_coords.append(f"{x} {y}")
                     cv2.circle(frame, (x,y), 2, (0, 255, 0), -1)
-                landmarks_coordinates.append(','.join(temp_landmark_coords))
+        else:
+            # Handle frames with no detected landmarks by appending empty string
+            print(f"No landmarks detected in frame {len(landmarks_coordinates) + 1} of video")
 
-        # Uncomment below line if you want to visualize the landmarks on the video frames
-        # cv2.imshow("MediaPipe FaceMesh", frame)
+        # Append the landmarks of this frame (even if empty) to landmarks_coordinates
+        landmarks_coordinates.append(','.join(temp_landmark_coords))
 
     # Save landmarks to specified output file
     output_data = '|'.join(landmarks_coordinates)
@@ -130,6 +131,6 @@ def process_video(input_video_path, output_file_path):
 cv2.destroyAllWindows()
 
 # Example usage
-input_video = "aqgy3_0001/00000.mp4"
-output_file = "test_00000_lm.txt"
+input_video = "ch-sims-videos/aqgy3_0002/00022.mp4"
+output_file = "test_00022_landmarks.txt"
 process_video(input_video, output_file)
