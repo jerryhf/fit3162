@@ -1,0 +1,19 @@
+Warning: No landmark available for frame 93 in file ch-sims-landmark\aqgy3_0002_landmarks\00022_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 94 in file ch-sims-landmark\aqgy3_0002_landmarks\00022_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 63 in file ch-sims-landmark\aqgy3_0002_landmarks\00024_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 64 in file ch-sims-landmark\aqgy3_0002_landmarks\00024_landmarks.txt. Skipping frame.
+Error: unexpected shape of cropped_video for file 00003_landmarks.txt. Shape: torch.Size([0])
+Warning: No landmark available for frame 96 in file ch-sims-landmark\aqgy3_0003_landmarks\00010_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 97 in file ch-sims-landmark\aqgy3_0003_landmarks\00010_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 98 in file ch-sims-landmark\aqgy3_0003_landmarks\00010_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 99 in file ch-sims-landmark\aqgy3_0003_landmarks\00010_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 100 in file ch-sims-landmark\aqgy3_0003_landmarks\00010_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 67 in file ch-sims-landmark\aqgy3_0003_landmarks\00011_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 68 in file ch-sims-landmark\aqgy3_0003_landmarks\00011_landmarks.txt. Skipping frame.
+Warning: No landmark available for frame 69 in file ch-sims-landmark\aqgy3_0003_landmarks\00011_landmarks.txt. Skipping frame.
+Error: unexpected shape of cropped_video for file 00001_landmarks.txt. Shape: torch.Size([0])
+Error: unexpected shape of cropped_video for file 00003_landmarks.txt. Shape: torch.Size([0])
+Error: unexpected shape of cropped_video for file 00026_landmarks.txt. Shape: torch.Size([0])
+Error: unexpected shape of cropped_video for file 00027_landmarks.txt. Shape: torch.Size([0])
+Warning: No landmark available for frame 58 in file ch-sims-landmark\aqgy3_0005_landmarks\00004_landmarks.txt. Skipping frame.
+Error: unexpected shape of cropped_video for file 00044_landmarks.txt. Shape: torch.Size([0])
