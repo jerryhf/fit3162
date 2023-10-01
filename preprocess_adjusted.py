@@ -43,7 +43,8 @@ class Preprocessing(Dataset):
 
     def build_file_list(self):
         file_list = []
-        landmarks = sorted(glob.glob(os.path.join(self.args.Landmark, '*.txt')))
+        # print(glob.glob(os.path.join(self.args.Landmark, '**', '*.txt'), recursive=True))
+        landmarks = sorted(glob.glob(os.path.join(self.args.Landmark, '**', '*.txt'), recursive=True))
         for lm in landmarks:
             if not os.path.exists(lm.replace(self.args.Landmark, self.args.Output_dir)[:-4] + '.mp4'):
                 file_list.append(lm)
@@ -54,8 +55,15 @@ class Preprocessing(Dataset):
 
     def __getitem__(self, idx):
         file_path = self.file_paths[idx]
-        directory = file_path.replace(self.args.Landmark, self.args.Data_dir)[:-4].replace('_landmarks', '')
-        ims = sorted(glob.glob(os.path.join(directory, 'PNG', '*.png')))
+        # Extracting subfolder_id and file_name without extension
+        t, file_name_with_ext = os.path.split(file_path)
+        file_name = os.path.splitext(file_name_with_ext)[0].replace('_landmarks', '')
+        subfolder_id = os.path.basename(t)
+        
+        # Construct the directory path to the PNGs
+        directory = os.path.join(self.args.Data_dir, subfolder_id.replace('_landmarks', ''), 'video', file_name)
+        # print(directory)
+        ims = sorted(glob.glob(os.path.join(directory, '*.png')))
 
         # ims = sorted(glob.glob(os.path.join(file_path.replace(self.args.Landmark, self.args.Data_dir)[:-4], '*.png')))
         frames = []
@@ -67,7 +75,7 @@ class Preprocessing(Dataset):
         t, f_name = os.path.split(file_path)
         t, m_name = os.path.split(t)
         _, s_name = os.path.split(t)
-        save_path = os.path.join(self.args.Output_dir, s_name, m_name)
+        save_path = os.path.join(self.args.Output_dir, subfolder_id.replace('_landmarks', ''))
         try:
             with open(file_path, 'r', encoding='utf-8') as lf:
                 lms = lf.readlines()[0]
@@ -76,10 +84,18 @@ class Preprocessing(Dataset):
                 lms = lf.readlines()[0]
         lms = lms.split('|')
         print(f"Processing: {file_path}, lms length = {len(lms)}, video frame length = {v.shape[0]}")
-        assert v.shape[0] == len(lms), f'the video frame length {v.shape[0]} differs to the landmark frames {len(lms)} for file {file_path}'
+        # assert v.shape[0] == len(lms), f'the video frame length {v.shape[0]} differs to the landmark frames {len(lms)} for file {file_path}'
         
         aligned_video = []
+        log_file = open('error_log.txt', 'a')
         for i, frame in enumerate(v):
+            if i >= len(lms):  # Prevent IndexError and handle frame-landmark mismatch
+                error_msg = f"Warning: No landmark available for frame {i} in file {file_path}. Skipping frame.\n"
+                print(error_msg)
+                with open("error_log.txt","a") as log_file:
+                    log_file.write(error_msg)
+                continue  # or continue, depending on how you want to handle this
+
             lm = lms[i].split(',')
             temp_lm = []
             for l in lm:
@@ -88,6 +104,8 @@ class Preprocessing(Dataset):
                     continue
                 x, y = l.split()
                 temp_lm.append([x, y])
+            if not temp_lm:
+                continue
             temp_lm = np.array(temp_lm, dtype=float)  # 98,2
 
             source_lm = temp_lm
@@ -100,14 +118,13 @@ class Preprocessing(Dataset):
         aligned_video = np.array(aligned_video)
 
         #### audio preprocessing ####
-        sub_folder = file_path.split('/')[-1].split('\\')[0]  # This gets 'aqgy3_0001_landmarks'
-        file_name = file_path.split('\\')[-1].split('_')[0]  # This gets '00000'
-        audio_file_path = os.path.join('.', 'extracted_frames_ch_sims', sub_folder.replace('_landmarks', ''), file_name, 'Audio', f"{file_name}.wav")
+        audio_file_path = os.path.join(self.args.Data_dir, subfolder_id.replace('_landmarks', ''), 'audio', f"{file_name}.wav")
         aud, _ = librosa.load(audio_file_path, sr=16000)
         fc = 55.  # Cut-off frequency of the filter
         w = fc / (16000 / 2)  # Normalize the frequency
         b, a = signal.butter(7, w, 'high')
         aud = signal.filtfilt(b, a, aud)
+        log_file.close()
 
         return torch.tensor(aligned_video), save_path, f_name, torch.tensor(aud.copy())
 
@@ -139,12 +156,20 @@ def main():
         cropped_video = cropped_video[0]
         save_path = save_path[0]
         f_name = f_name[0]
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        if not os.path.exists(save_path.replace('video', 'audio')):
-            os.makedirs(save_path.replace('video', 'audio'))
-        torchvision.io.write_video(os.path.join(save_path, f_name[:-4] + '.mp4'), video_array=cropped_video, fps=args.FPS)
-        sf.write(os.path.join(save_path.replace('video', 'audio'), f_name[:-4] + ".flac"), aud.numpy(), samplerate=16000)
+        video_path = os.path.join(save_path, 'video')
+        audio_path = os.path.join(save_path, 'audio')
+        if not os.path.exists(video_path):
+            os.makedirs(video_path)
+        if not os.path.exists(audio_path):
+            os.makedirs(audio_path)
+        if len(cropped_video.shape) != 4 or cropped_video.shape[3] != 3:
+            with open("error_log.txt", 'a') as log_file:
+                error_msg = f"Error: unexpected shape of cropped_video for file {f_name}. Shape: {cropped_video.shape}\n"
+                print(error_msg)
+                log_file.write(error_msg)
+            continue
+        torchvision.io.write_video(os.path.join(video_path, f_name[:-4] + '.mp4'), video_array=cropped_video, fps=args.FPS)
+        sf.write(os.path.join(audio_path, f_name[:-4] + ".flac"), aud.numpy(), samplerate=16000)
         print('##########', kk + 1, ' / ', len(Data_loader), '##########')
 
 
