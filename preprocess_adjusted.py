@@ -55,7 +55,6 @@ class Preprocessing(Dataset):
     def __getitem__(self, idx):
         file_path = self.file_paths[idx]
         directory = file_path.replace(self.args.Landmark, self.args.Data_dir)[:-4].replace('_landmarks', '')
-        print(directory)
         ims = sorted(glob.glob(os.path.join(directory, 'PNG', '*.png')))
 
         # ims = sorted(glob.glob(os.path.join(file_path.replace(self.args.Landmark, self.args.Data_dir)[:-4], '*.png')))
@@ -75,22 +74,23 @@ class Preprocessing(Dataset):
         except:
             with open(file_path, 'r', encoding='cp949') as lf:
                 lms = lf.readlines()[0]
-        lms = lms.split(':')[-1].split('|')
-        assert v.shape[0] == len(lms), 'the video frame length differs to the landmark frames'
-
+        lms = lms.split('|')
+        print(f"Processing: {file_path}, lms length = {len(lms)}, video frame length = {v.shape[0]}")
+        assert v.shape[0] == len(lms), f'the video frame length {v.shape[0]} differs to the landmark frames {len(lms)} for file {file_path}'
+        
         aligned_video = []
         for i, frame in enumerate(v):
             lm = lms[i].split(',')
             temp_lm = []
             for l in lm:
+                if not l:  # this checks if l is an empty string
+                    print("Warning: No landmark detected in this frame. Skipping.")
+                    continue
                 x, y = l.split()
                 temp_lm.append([x, y])
             temp_lm = np.array(temp_lm, dtype=float)  # 98,2
 
             source_lm = temp_lm
-
-            print(source_lm.shape)
-            print(self.refer_lm.shape)
 
             self.tform.estimate(source_lm, self.refer_lm)
             mat = self.tform.params[0:2, :]
@@ -100,7 +100,10 @@ class Preprocessing(Dataset):
         aligned_video = np.array(aligned_video)
 
         #### audio preprocessing ####
-        aud, _ = librosa.load(os.path.join(file_path.replace(self.args.Landmark, self.args.Data_dir).replace('video', 'audio')[:-4] + '.wav'), 16000)
+        sub_folder = file_path.split('/')[-1].split('\\')[0]  # This gets 'aqgy3_0001_landmarks'
+        file_name = file_path.split('\\')[-1].split('_')[0]  # This gets '00000'
+        audio_file_path = os.path.join('.', 'extracted_frames_ch_sims', sub_folder.replace('_landmarks', ''), file_name, 'Audio', f"{file_name}.wav")
+        aud, _ = librosa.load(audio_file_path, sr=16000)
         fc = 55.  # Cut-off frequency of the filter
         w = fc / (16000 / 2)  # Normalize the frequency
         b, a = signal.butter(7, w, 'high')
