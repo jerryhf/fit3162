@@ -115,7 +115,7 @@ class Preprocessing(Dataset):
         return torch.tensor(aligned_video), save_path, f_name, torch.tensor(aud.copy())
 
 Data = Preprocessing()
-Data_loader = DataLoader(Data, shuffle=False, batch_size=1, num_workers=3)
+Data_loader = DataLoader(Data, shuffle=False, batch_size=1, num_workers=2)
 tform = transform.SimilarityTransform()
 
 for kk, data in enumerate(Data_loader):
