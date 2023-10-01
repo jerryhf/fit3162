@@ -4,12 +4,14 @@
 - Video and landmark in the Google Drive ch-sims-landmark and ch-sims-videos
 - Files starting with ._ are removed
 - 4 videos I remember are missing from ch-sims-videos, not sure where just continue first
-- Dandi have complete LMs (dandi_face_landmark), I have significantly less (ch-sims-landmark)
+- Dandi have complete LMs (dandi_face_landmark), I have significantly less (ch-sims-landmark) -> 98 landmark is what is expected
+- Frame with no detected landmarks are appended as empty strings in the landmark.txt file. e.g. 987 202, ... || 627 405,...
 
-# Next steps
-- Preprocessing for GRID and LRS is different
-    - GRID needs to use extract_frames -> preprocess. preprocess is using ref_face, which is the reference landmark for the face. But it seems to be different format than the LM given for GRID (different length/amount of LMs when I split by '|' and then split by ',')
-    - LRS only need to extract audio, and then continue training.
-- Maybe the LM given for LRS and GRID is different, such that GRID needs to be processed first while LRS can immediately be used.
-- Need to check both approach, which can be used with our extracted LMs.
-
+# Current Issues
+- Current preprocessing produces a very blurred resulting video, and it is also rotated very weirdly. This is not seen when trying with the original GRID dataset. Possible causes:
+    - Ref_face is not modified for our landmark
+    - Transformation in preprocess does not work well for our landmarks
+- During preprocessing, some frames do not have detected landmark, therefore it is empty string in the landmarks.txt file. Currently it is added as empty string in the landmark.txt file, and will be skipped during preprocessing.
+- Some videos do not have detected landmarks at all, this will result in error during cropped video in preprocessing:  
+Error: unexpected shape of cropped_video for file 00044_landmarks.txt. Shape: torch.Size([0]) -> Check error_log.txt  
+This can be fixed by filtering videos where no landmark is detected at all, I am currently working with the data that has not been filtered out.
