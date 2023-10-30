@@ -26,21 +26,31 @@ def visualize_landmarks(input_video_path, input_landmark_path, output_video_path
     out = cv2.VideoWriter(output_video_path, fourcc, 20.0, (frame_width, frame_height))
 
     frame_count = 0
+    frame_count = 0
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
         
-        # Get landmark coordinates for current frame
-        landmarks = landmarks_per_frame[frame_count].split(',')
-        for landmark in landmarks:
-            x, y = map(int, landmark.split())
-            cv2.circle(frame, (x, y), 2, (0, 255, 0), -1)  # Draw green dots for landmarks
+        # Check if there are landmarks for the current frame
+        if frame_count < len(landmarks_per_frame):
+            # Get landmark coordinates for current frame
+            landmarks = landmarks_per_frame[frame_count].split(',')
+            for landmark in landmarks:
+                if landmark:  # Check if landmark is not an empty string
+                    x, y = map(int, landmark.split())
+                    length = 5  # Length of each arm of the cross
+                    color = (0, 255, 0)  # Green color
+                    thickness = 2  # Line thickness
+
+                    cv2.line(frame, (x - length, y), (x + length, y), color, thickness)
+                    cv2.line(frame, (x, y - length), (x, y + length), color, thickness)
         
-        # Write the frame to the output video
+        # Write the frame to the output video, with or without landmarks
         out.write(frame)
         
         frame_count += 1
+
 
     # Release video objects
     cap.release()
@@ -48,11 +58,11 @@ def visualize_landmarks(input_video_path, input_landmark_path, output_video_path
     cv2.destroyAllWindows()
 
 
-video_input_id = r"00000"
+video_input_id = r"00000.mpg"
 
-video_input = f"./aqgy3_0001/{video_input_id}.mp4"
-landmark_input = f"./ch-sims-landmark/aqgy3_0001_landmarks/{video_input_id}_landmarks.txt"
-output_video = f"./{video_input_id}_visualize.mp4"
+video_input = r"D:\Lenovo\Documents\TrueDocuments\MonashLessons\july_2023\final-year-project-fit3162\aqgy3_0001\00000.mp4"
+landmark_input = r"D:\Lenovo\Documents\TrueDocuments\MonashLessons\july_2023\final-year-project-fit3162\ch-sims-landmark\aqgy3_0001_landmarks\00000_landmarks.txt"
+output_video = f"./00000_visualize.mp4"
 
 # Example of how to use the function
 visualize_landmarks(video_input, landmark_input, output_video)
